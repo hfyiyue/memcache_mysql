@@ -11,6 +11,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <mysql/mysql.h>
+#include <mysql/mysqld_error.h>
+#include <mysql/errmsg.h>
 #ifdef __sun
 #include <atomic.h>
 #endif
@@ -851,6 +853,10 @@ void thread_init(int nthreads, struct event_base *main_base) {
     wait_for_thread_registration(nthreads);
     pthread_mutex_unlock(&init_lock);
 }
+void refresh_mysql_conn(MYSQL *localmyData)
+{
+  mysql_real_connect(localmyData,mysql_ad,mysql_u,mysql_p,"memcached",3306,0,0);
+}
 void mysqlsync_thread()
 {
    
@@ -916,6 +922,10 @@ void mysqlsync_thread()
         strcat(delete_str,ITEM_key(*llo_item));
         strcat(delete_str,"\';");
         res_q=mysql_query(myData,delete_str);
+        if(CR_SERVER_GONE_ERROR == res_q || CR_SERVER_LOST)
+        {
+		refresh_mysql_conn(myData);
+        } 
 	free(delete_str);
            
 
@@ -948,7 +958,11 @@ void mysqlsync_thread()
      printf("%s\n",insert_str);	
 
      res_q=mysql_query(myData,insert_str);
-  
+     if(CR_SERVER_GONE_ERROR == res_q || CR_SERVER_LOST)
+        {
+                refresh_mysql_conn(myData);
+        }
+		     
      free(insert_str);
      glo_item_head++;
      if(glo_item_head+1>max_mysql_sync_item)glo_item_head=0;     
