@@ -922,7 +922,7 @@ void mysqlsync_thread()
         strcat(delete_str,ITEM_key(*llo_item));
         strcat(delete_str,"\';");
         res_q=mysql_query(myData,delete_str);
-        if(CR_SERVER_GONE_ERROR == res_q || CR_SERVER_LOST)
+        if(CR_SERVER_GONE_ERROR == res_q || CR_SERVER_LOST == res_q)
         {
 		refresh_mysql_conn(myData);
         } 
@@ -958,7 +958,7 @@ void mysqlsync_thread()
      printf("%s\n",insert_str);	
 
      res_q=mysql_query(myData,insert_str);
-     if(CR_SERVER_GONE_ERROR == res_q || CR_SERVER_LOST)
+     if(CR_SERVER_GONE_ERROR == res_q || CR_SERVER_LOST == res_q)
         {
                 refresh_mysql_conn(myData);
         }
