@@ -50,6 +50,16 @@ pthread_mutex_t atomics_mutex = PTHREAD_MUTEX_INITIALIZER;
 /* Lock for global stats */
 static pthread_mutex_t stats_lock;
 
+
+extern item **glo_item;
+extern int *glo_item_cmd;
+extern int glo_item_head;
+extern int glo_item_tail;
+extern char *mysql_ad;
+extern char *mysql_u;
+extern char *mysql_p;
+
+
 /* Free list of CQ_ITEM structs */
 static CQ_ITEM *cqi_freelist;
 static pthread_mutex_t cqi_freelist_lock;
@@ -843,16 +853,30 @@ void thread_init(int nthreads, struct event_base *main_base) {
 }
 void mysqlsync_thread()
 {
-   extern item **glo_item;
-   extern int *glo_item_cmd;
-   extern int glo_item_head;
-   extern int glo_item_tail;
    
    int res_q;
-   
+   int res;
+      
    MYSQL * myData;
    myData = mysql_init((MYSQL*)0);
-   int res=mysql_real_connect(myData,"127.0.0.1","root","","memcached",3306,0,0);
+
+   if(mysql_ad && mysql_u && mysql_p){
+       res=mysql_real_connect(myData,mysql_ad,mysql_u,mysql_p,"memcached",3306,0,0);
+   }else
+   {
+      if (!mysql_ad) {
+         printf("%s\n","Please use -H set MYsql database ip address!");
+      }
+    
+      if (!mysql_u) {
+         printf("%s\n","Please use -W set MYsql databse username!");  
+      }
+
+      if (!mysql_p) {
+         printf("%s\n","Please use -F set MYsql database password!");  
+      }
+      return 0;
+   }
 
    if(!res){
 
@@ -870,8 +894,13 @@ void mysqlsync_thread()
    llo_item_cmd=llo_item_cmd+glo_item_head;
    res_q=0;
 
-   if ( *llo_item > 0 && glo_item_head<=glo_item_tail){
+   if ( glo_item_head<=glo_item_tail){
      
+     if( *llo_item == 0 ) {
+	glo_item_head++;
+        continue;	
+     }
+                   
 
      if(*llo_item_cmd != NREAD_ADD){
         
@@ -885,7 +914,7 @@ void mysqlsync_thread()
         memset(delete_str,'\0',strlen(deletesql) + (*llo_item)->nkey + 1);
         strcat(delete_str,deletesql);
         strcat(delete_str,ITEM_key(*llo_item));
-        strcat(delete_str,"\'");
+        strcat(delete_str,"\';");
         res_q=mysql_query(myData,delete_str);
 	free(delete_str);
            

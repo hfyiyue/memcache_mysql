@@ -106,6 +106,9 @@ item **glo_item;
 int *glo_item_cmd;
 int glo_item_tail=0;
 int glo_item_head=0;
+char *mysql_ad=0;
+char *mysql_u=0;
+char *mysql_p=0;
 
 struct slab_rebalance slab_rebal;
 volatile int slab_rebalance_signal;
@@ -4519,7 +4522,9 @@ static void usage(void) {
            "                restart.\n"
            );
 #ifdef ENABLE_MYSQLSYNC
-   
+    printf("-H           Mysql Database ip address\n");
+    printf("-W           Mysql Database username\n");
+    printf("-F           Mysql Database password\n");  
 #endif
     return;
 }
@@ -4793,6 +4798,11 @@ int main (int argc, char **argv) {
           "I:"  /* Max item size */
           "S"   /* Sasl ON */
           "o:"  /* Extended generic options */
+         #ifdef ENABLE_MYSQLSYNC
+          "H:"  /* Mysql database ip address */
+          "W:"  /* Mysql database username */
+          "F:"  /* Mysql databse  password */
+         #endif 
         ))) {
         switch (c) {
         case 'a':
@@ -4971,6 +4981,32 @@ int main (int argc, char **argv) {
 #endif
             settings.sasl = true;
             break;
+#ifdef ENABLE_MYSQLSYNC
+
+        case 'H':
+          
+          if(!optarg){
+            break;
+          }
+          mysql_ad=optarg; 
+          break;
+        case 'W':
+          if(!optarg){
+	    break; 	
+          }
+          mysql_u=optarg;
+          break;
+
+
+        case 'F':
+	  	
+          if(!optarg){
+            break;
+          }
+          mysql_p=optarg;          
+          break;
+
+#endif
         case 'o': /* It's sub-opts time! */
             subopts = optarg;
 
