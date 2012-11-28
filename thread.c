@@ -853,6 +853,7 @@ void thread_init(int nthreads, struct event_base *main_base) {
     wait_for_thread_registration(nthreads);
     pthread_mutex_unlock(&init_lock);
 }
+#ifdef ENABLE_MYSQLSYNC
 void refresh_mysql_conn(MYSQL *localmyData)
 {
   mysql_real_connect(localmyData,mysql_ad,mysql_u,mysql_p,"memcached",3306,0,0);
@@ -984,6 +985,6 @@ void mysqlsync()
   pthread_t thread;
   pthread_create(&thread,0,mysqlsync_thread,0);
 }
-
+#endif
 
 
