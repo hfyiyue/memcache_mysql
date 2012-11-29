@@ -60,7 +60,7 @@ extern int glo_item_tail;
 extern char *mysql_ad;
 extern char *mysql_u;
 extern char *mysql_p;
-
+extern char *bin_path;
 
 /* Free list of CQ_ITEM structs */
 static CQ_ITEM *cqi_freelist;
@@ -858,6 +858,7 @@ void refresh_mysql_conn(MYSQL *localmyData)
 {
   mysql_real_connect(localmyData,mysql_ad,mysql_u,mysql_p,"memcached",3306,0,0);
 }
+
 void mysqlsync_thread()
 {
    
@@ -866,6 +867,31 @@ void mysqlsync_thread()
       
    MYSQL * myData;
    myData = mysql_init((MYSQL*)0);
+  
+
+   char *bin_file_path=0;
+   FILE *my_sync_f=0;
+   char *log_file_str=malloc(1000);
+   memset(log_file_str,'\0',1000);   
+
+   if (bin_path) {
+
+	bin_file_path=malloc(strlen(bin_path)+4);
+        if (!bin_file_path) {
+	  
+			
+        }	
+        
+        memset(bin_file_path,'\0',strlen(bin_path)+4);
+        strcat(bin_file_path,bin_path);
+        strcat(bin_file_path,".log");
+
+        my_sync_f=fopen(bin_file_path,"rw");
+                
+        
+
+   }
+  
 
    if(mysql_ad && mysql_u && mysql_p){
        res=mysql_real_connect(myData,mysql_ad,mysql_u,mysql_p,"memcached",3306,0,0);
