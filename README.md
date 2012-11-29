@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Memcached
 
 ## Dependencies
@@ -37,9 +36,3 @@ should never go to disk, or you've lost the whole point of it)
 Want to contribute?  Up-to-date pointers should be at:
 
 * http://contributing.appspot.com/memcached
-=======
-memcache_mysql
-==============
-
-实现 memcache  和 mysql  同步的 memcache
->>>>>>> facea02983df555f0c4dfb30dbc4a37f7ae547eb
